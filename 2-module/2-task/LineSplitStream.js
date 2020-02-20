@@ -25,7 +25,7 @@ class LineSplitStream extends stream.Transform {
 
 
   _flush(callback) {
-    // вызывается один раз в конце обработки чанка, пушит последний сложенный эл
+    // вызывается один раз в конце обработки стрима, пушит последний сложенный эл
     callback(null, this._nextStr);
   }
 }
