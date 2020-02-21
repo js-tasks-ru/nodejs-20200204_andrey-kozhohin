@@ -10,7 +10,8 @@ const server = new http.Server();
 let filepath;
 
 server.on('clientError', () => { // при обрыве соединения удаляем файл
-    fs.unlink(filepath, () => {});
+    fs.unlink(filepath, () => {
+    });
 });
 
 server.on('request', (req, res) => {
@@ -34,6 +35,18 @@ server.on('request', (req, res) => {
                         const writeStream = fs.createWriteStream(filepath);
                         const limitStream = new LimitSizeStream({limit: LIMIT});
 
+                        req.pipe(limitStream).on('error', (err) => {
+                            res.statusCode = 413;
+                            console.log(err.code);
+                            console.log(res.statusCode);
+                            res.end();
+                        }).pipe(writeStream).on('finish', () => {
+                            res.statusCode = 201;
+                            console.log(res.statusCode);
+                            res.end();
+                        });
+
+                        /*
                         pipeline(
                             req,
                             limitStream,
@@ -50,6 +63,7 @@ server.on('request', (req, res) => {
                                     res.end();
                                 }
                             });
+                        */
 
                     } else { // ошибка если файл уже существует или запрос пустой
                         res.statusCode = 409;
