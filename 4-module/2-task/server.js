@@ -7,17 +7,16 @@ const fs = require('fs');
 
 const server = new http.Server();
 
-let filepath;
-
-server.on('clientError', () => { // при обрыве соединения удаляем файл
-    fs.unlink(filepath, () => {
-    });
-});
-
 server.on('request', (req, res) => {
 
     const pathname = url.parse(req.url).pathname.slice(1);
-    filepath = path.join(__dirname, 'files', pathname);
+    const filepath = path.join(__dirname, 'files', pathname);
+
+    server.on('clientError', () => { // при обрыве соединения удаляем файл
+        fs.unlink(filepath, () => {
+            res.end();
+        });
+    });
 
     const urlArr = pathname.split('/');
 
@@ -35,14 +34,16 @@ server.on('request', (req, res) => {
                         const writeStream = fs.createWriteStream(filepath);
                         const limitStream = new LimitSizeStream({limit: LIMIT});
 
-                        req.pipe(limitStream).on('error', (err) => {
-                            res.statusCode = 413;
-                            console.log(err.code);
-                            console.log(res.statusCode);
-                            res.end();
+                        req.pipe(limitStream).on('error', (err) => { // файл больше заданного лимита
+                            fs.unlink(filepath, () => {
+                                res.statusCode = 413;
+                                // console.log(err.code);
+                                // console.log(res.statusCode);
+                                res.end('done');
+                            });
+
                         }).pipe(writeStream).on('finish', () => {
                             res.statusCode = 201;
-                            console.log(res.statusCode);
                             res.end();
                         });
 
