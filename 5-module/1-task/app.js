@@ -12,17 +12,15 @@ let clients = [];
 
 router.get('/subscribe', async (ctx, next) => { // получение сообщений. запрос подвешивается
 
-
     ctx.set('Content-Type', 'text/plain;charset=utf-8');
     ctx.set("Cache-Control", "no-cache, must-revalidate");
 
+    // await останавливает выполнение кода пока не будет получен ответ от промиса
     await new Promise((resolve, reject) => {
         // const id = ctx.request.query.r;
-        // clients[id] = resolve; // ответ промиса
-        clients.push(resolve);
+        clients.push(resolve); // функцию ответа этого промиса сохраняем в массив
 
     }).then(message => {
-        //console.log(message)
         //ctx.status = 200;
         ctx.body = message;
     });
@@ -37,8 +35,7 @@ router.post('/publish', async (ctx, next) => { // отправка сообще�
     }
 
     clients.forEach((resolve) => {
-        resolve(String(message));
-        //console.log(resolve);
+        resolve(String(message)); // вызываем функцию ответа промиса и передаем в него сообщение
     });
 
     clients = [];
