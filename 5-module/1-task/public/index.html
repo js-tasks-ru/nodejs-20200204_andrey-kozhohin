@@ -19,7 +19,7 @@
   publish.onsubmit = function() {
     const xhr = new XMLHttpRequest();
 
-    xhr.open("POST", "/publish", true);
+    xhr.open("POST", "/publish", true); // отправка сообщений
 
     xhr.setRequestHeader('Content-Type', 'application/json;charset=utf-8');
     xhr.send(JSON.stringify({message: this.elements.message.value}));
@@ -34,7 +34,7 @@
   function subscribe() {
     const xhr = new XMLHttpRequest();
 
-    xhr.open("GET", "/subscribe?r=" + Math.random(), true);
+    xhr.open("GET", "/subscribe?r=" + Math.random(), true); // получение сообщений. запрос подвешивается
 
     xhr.onload = function() {
       if(xhr.status != 200) return this.onerror();
