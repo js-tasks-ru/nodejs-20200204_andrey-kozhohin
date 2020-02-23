@@ -94,6 +94,7 @@ describe('4-module-2-task', () => {
           // EPIPE/ECONNRESET error should occur because we try to pipe after res closed
           if (!['ECONNRESET', 'EPIPE'].includes(err.code)) done(err);
         });
+
         fse.createReadStream(path.join(fixturesFolder, 'big.png')).pipe(request);
       });
 
