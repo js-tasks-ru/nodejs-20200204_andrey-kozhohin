@@ -1,10 +1,10 @@
 const app = require('../app');
 const connection = require('../libs/connection');
 const User = require('../models/User');
-const request = require('request-promise').defaults({
-  resolveWithFullResponse: true,
-  simple: false,
-  json: true,
+const axios = require('axios');
+const request = axios.create({
+  responseType: 'json',
+  validateStatus: () => true,
 });
 const transportEngine = require('../libs/sendMail').transportEngine;
 const expect = require('chai').expect;
@@ -40,11 +40,11 @@ describe('8-module-1-task', () => {
 
       const response = await request({
         method: 'post',
-        uri: 'http://localhost:3000/api/register',
-        body: newUserData,
+        url: 'http://localhost:3000/api/register',
+        data: newUserData,
       });
 
-      expect(response.body, 'ответ сервера содержит поле status').to.eql({status: 'ok'});
+      expect(response.data, 'ответ сервера содержит поле status').to.eql({status: 'ok'});
       expect(get(envelope, 'to[0]'), 'письмо отправлено на указанный email').to
           .equal(newUserData.email);
 
@@ -68,12 +68,12 @@ describe('8-module-1-task', () => {
 
       const response = await request({
         method: 'post',
-        uri: 'http://localhost:3000/api/register',
-        body: userData,
+        url: 'http://localhost:3000/api/register',
+        data: userData,
       });
 
-      expect(response.statusCode).to.equal(400);
-      expect(response.body).to.eql({errors: {email: 'Такой email уже существует'}});
+      expect(response.status).to.equal(400);
+      expect(response.data).to.eql({errors: {email: 'Такой email уже существует'}});
     });
 
     it('при попытке входа пользователя не подтвердившего email - ошибка', async () => {
@@ -90,15 +90,15 @@ describe('8-module-1-task', () => {
 
       const response = await request({
         method: 'post',
-        uri: 'http://localhost:3000/api/login',
-        body: {
+        url: 'http://localhost:3000/api/login',
+        data: {
           email: newUserData.email,
           password: newUserData.password,
         },
       });
 
-      expect(response.statusCode).to.equal(400);
-      expect(response.body).to.eql({error: 'Подтвердите email'});
+      expect(response.status).to.equal(400);
+      expect(response.data).to.eql({error: 'Подтвердите email'});
     });
 
     it('при запросе /confirm verificationToken в базе удаляется, токен есть в ответе сервера',
@@ -116,8 +116,8 @@ describe('8-module-1-task', () => {
 
           const response = await request({
             method: 'post',
-            uri: 'http://localhost:3000/api/confirm',
-            body: {
+            url: 'http://localhost:3000/api/confirm',
+            data: {
               verificationToken: newUserData.verificationToken,
             },
           });
@@ -127,19 +127,19 @@ describe('8-module-1-task', () => {
           expect(user, 'verificationToken должен быть undefined').to.have
               .property('verificationToken', undefined);
 
-          expect(response.body, 'с сервера должен вернуться token').to.has.property('token');
+          expect(response.data, 'с сервера должен вернуться token').to.has.property('token');
         });
 
     it('при запросе /confirm с неправильным токеном - ошибка', async () => {
       const response = await request({
         method: 'post',
-        uri: 'http://localhost:3000/api/confirm',
-        body: {
+        url: 'http://localhost:3000/api/confirm',
+        data: {
           verificationToken: 'randomtoken',
         },
       });
 
-      expect(response.body, 'с сервера должна вернуться ошибка').to
+      expect(response.data, 'с сервера должна вернуться ошибка').to
           .eql({error: 'Ссылка подтверждения недействительна или устарела'});
     });
   });
