@@ -11,10 +11,12 @@ module.exports.register = async (ctx, next) => {
     return returnErrs;
   }
 
+  const token = uuid();
+
   const regUser = new User({
     email: ctx.request.body.email,
     displayName: ctx.request.body.displayName,
-    verificationToken: uuid(),
+    verificationToken: token,
     passwordHash: '',
     salt: '',
   });
