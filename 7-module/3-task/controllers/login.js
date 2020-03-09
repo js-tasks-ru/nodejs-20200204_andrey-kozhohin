@@ -10,7 +10,7 @@ module.exports.login = async function login(ctx, next) {
       return;
     }
 
-    const token = await ctx.login(user);
+    const token = await ctx.login(user); // Функцию мы сохранили в app.js
 
     ctx.body = {token};
   })(ctx, next);
